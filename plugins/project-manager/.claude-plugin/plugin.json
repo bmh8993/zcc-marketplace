@@ -1,0 +1,8 @@
+{
+  "name": "project-manager",
+  "description": "Session-to-session context handoff and enhanced memory management",
+  "version": "1.0.0",
+  "author": {
+    "name": "zayden"
+  }
+}

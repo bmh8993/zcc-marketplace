@@ -1,0 +1,20 @@
+{
+  "name": "zcc-marketplace",
+  "owner": {
+    "name": "zayden"
+  },
+  "plugins": [
+    {
+      "name": "skill-usage-tracker",
+      "source": "./plugins/skill-usage-tracker",
+      "description": "Track and analyze skill usage statistics across Claude Code sessions",
+      "version": "1.0.0"
+    },
+    {
+      "name": "project-manager",
+      "source": "./plugins/project-manager",
+      "description": "Session-to-session context handoff and enhanced memory management",
+      "version": "1.0.0"
+    }
+  ]
+}

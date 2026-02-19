@@ -1,0 +1,8 @@
+{
+  "name": "skill-usage-tracker",
+  "description": "Track and analyze skill usage statistics across Claude Code sessions",
+  "version": "1.0.0",
+  "author": {
+    "name": "zayden"
+  }
+}

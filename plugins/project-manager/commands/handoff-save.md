@@ -33,8 +33,14 @@ git diff --stat HEAD~3 2>/dev/null || git diff --stat
 PROJECT_NAME="$(pwd | sed 's/^\///; s/[\/.]/-/g; s/^/-/')"
 CONTEXT_FILE="$HOME/.claude/projects/$PROJECT_NAME/context.md"
 
-# 현재 세션 ID 생성
-SESSION_ID="$(date +%s)-$$"
+# 현재 세션 ID (.jsonl 파일명에서 추출)
+if [[ "$(uname)" == "Darwin" ]]; then
+  LATEST_JSONL="$(find "$HOME/.claude/projects/$PROJECT_NAME" -name "*.jsonl" -type f -exec stat -f '%m %N' {} \; 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)"
+else
+  LATEST_JSONL="$(find "$HOME/.claude/projects/$PROJECT_NAME" -name "*.jsonl" -type f -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)"
+fi
+
+SESSION_ID="$(basename "$LATEST_JSONL" .jsonl)"
 ```
 
 ### 2. 현재 세션 분석

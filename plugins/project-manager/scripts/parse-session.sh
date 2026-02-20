@@ -11,13 +11,14 @@ PROJECT_DIR="$(pwd)"
 PROJECT_NAME="$(echo "$PROJECT_DIR" | sed 's/^\///; s/[\/.]/-/g; s/^/-/')"
 SESSION_DIR="$HOME/.claude/projects/$PROJECT_NAME"
 
-# Find most recent .jsonl file (macOS-compatible)
+# Find second most recent .jsonl file (previous session)
+# We skip the most recent one because that's the current session
 if [[ "$(uname)" == "Darwin" ]]; then
   LATEST_JSONL="$(find "$SESSION_DIR" -name "*.jsonl" -type f 2>/dev/null | while read -r file; do
     stat -f '%m %N' "$file"
-  done | sort -n | tail -1 | cut -d' ' -f2-)"
+  done | sort -n | tail -2 | head -1 | cut -d' ' -f2-)"
 else
-  LATEST_JSONL="$(find "$SESSION_DIR" -name "*.jsonl" -type f -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -1 | cut -d' ' -f2-)"
+  LATEST_JSONL="$(find "$SESSION_DIR" -name "*.jsonl" -type f -printf '%T@ %p\n' 2>/dev/null | sort -n | tail -2 | head -1 | cut -d' ' -f2-)"
 fi
 
 if [ -z "$LATEST_JSONL" ] || [ ! -f "$LATEST_JSONL" ]; then

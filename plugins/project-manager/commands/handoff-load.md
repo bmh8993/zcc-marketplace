@@ -1,6 +1,6 @@
 ---
 name: handoff-load
-description: Load previous session context from context.md or latest .jsonl file
+description: Load previous session context from context.md or specific session
 allowed-tools:
   - Bash
   - Read
@@ -12,9 +12,8 @@ Load context from previous session to resume work.
 This will:
 1. Check for context.md in ~/.claude/projects/<project>/
 2. If found, display it
-3. Check for tasks in ~/.claude/tasks/<session_id>/
-4. If found, load and display tasks
-5. If context.md not found, parse latest .jsonl session file
+3. If session_id argument provided, load that specific session
+4. If no context.md and no session_id, load previous session (.jsonl file)
 
 ## 실행 절차
 
@@ -23,6 +22,10 @@ This will:
 ```bash
 PROJECT_NAME="$(pwd | sed 's/^\///; s/[\/.]/-/g; s/^/-/')"
 CONTEXT_FILE="$HOME/.claude/projects/$PROJECT_NAME/context.md"
+SESSION_DIR="$HOME/.claude/projects/$PROJECT_NAME"
+
+# 인자로 받은 session_id (선택적)
+REQUESTED_SESSION_ID="$1"
 ```
 
 ### 2. context.md 로드
@@ -32,8 +35,29 @@ if [ -f "$CONTEXT_FILE" ] && [ -s "$CONTEXT_FILE" ]; then
   echo "📋 Loading context from: $CONTEXT_FILE"
   echo ""
   cat "$CONTEXT_FILE"
+elif [ -n "$REQUESTED_SESSION_ID" ]; then
+  # 특정 세션 ID 로드
+  SESSION_FILE="$SESSION_DIR/${REQUESTED_SESSION_ID}.jsonl"
+  if [ -f "$SESSION_FILE" ]; then
+    echo "📂 Loading session: $REQUESTED_SESSION_ID"
+    echo ""
+    # 해당 세션 파일 파싱 (parse-session.sh 로직 활용)
+    command -v jq >/dev/null 2>&1 || { echo "❌ jq required" >&2; exit 1; }
+    LAST_USER_MSG="$(grep '"type":"user"' "$SESSION_FILE" | tail -1 | jq -r '.message.content' 2>/dev/null || echo 'N/A')"
+    LAST_RESPONSE="$(grep '"type":"assistant"' "$SESSION_FILE" | jq -r 'select(.message.content[0].type == "text") | .message.content[0].text' 2>/dev/null | tail -1 || echo 'N/A')"
+    echo "**세션:** $REQUESTED_SESSION_ID"
+    echo ""
+    echo "## 마지막 사용자 메시지"
+    echo "$LAST_USER_MSG"
+    echo ""
+    echo "## 마지막 어시스턴트 응답"
+    echo "$LAST_RESPONSE"
+  else
+    echo "❌ Session file not found: $SESSION_FILE"
+  fi
 else
-  echo "📂 context.md not found. Parsing latest session..."
+  # context.md도 없고 인자도 없으면 이전 세션 로드
+  echo "📂 context.md not found. Loading previous session..."
   echo ""
   ${CLAUDE_PLUGIN_ROOT}/scripts/parse-session.sh
 fi
@@ -41,15 +65,19 @@ fi
 
 ### 3. tasks 로드
 
-context.md에서 **세션 ID**를 추출해서 해당 세션의 tasks를 로드합니다:
+**세션 ID**를 추출해서 해당 세션의 tasks를 로드합니다:
 
 ```bash
-# context.md에서 세션 ID 추출
-SESSION_ID="$(grep "세션 ID:" "$CONTEXT_FILE" 2>/dev/null | sed 's/.*세션 ID: //' | tr -d ' *')"
+# 세션 ID 결정 (우선순위: 인자 > context.md)
+if [ -n "$REQUESTED_SESSION_ID" ]; then
+  SESSION_ID="$REQUESTED_SESSION_ID"
+else
+  SESSION_ID="$(grep "세션 ID:" "$CONTEXT_FILE" 2>/dev/null | sed 's/.*세션 ID: //' | tr -d ' *')"
+fi
 
 if [ -n "$SESSION_ID" ] && [ -d "$HOME/.claude/tasks/$SESSION_ID" ]; then
   echo ""
-  echo "📋 Tasks from previous session:"
+  echo "📋 Tasks from session: $SESSION_ID"
   echo ""
 
   # tasks 디렉토리의 JSON 파일들 로드
@@ -63,16 +91,39 @@ fi
 
 ## 출력 형식
 
+### context.md가 있는 경우
 ```
 📋 Loading context from: /home/user/.claude/projects/-home-user-workspace-my-project/context.md
 
 [context.md 내용]
 
-📋 Tasks from previous session:
+📋 Tasks from session: abc123-def456-...
 
 📌 task-1
 [task 내용]
 
 📌 task-2
 [task 내용]
+```
+
+### 특정 세션 ID를 지정한 경우
+```
+📂 Loading session: abc123-def456-...
+
+**세션:** abc123-def456-...
+
+## 마지막 사용자 메시지
+[사용자 메시지]
+
+## 마지막 어시스턴트 응답
+[어시스턴트 응답]
+```
+
+### context.md가 없고 인자도 없는 경우
+```
+📂 context.md not found. Loading previous session...
+
+📂 Parsing: abc123-def456-....jsonl
+
+[파싱된 세션 정보]
 ```

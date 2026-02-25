@@ -80,21 +80,39 @@ Runs the full wrap-up workflow:
 
 The enhanced `doc-updater` agent handles all 5 Claude Code memory types:
 
-| Type | Location | Purpose |
-|------|----------|---------|
-| **CLAUDE.md** | Project root | Project memory (team-shared, git-tracked) |
-| **CLAUDE.local.md** | Project root | Personal settings (git-ignored) |
-| **MEMORY.md** | `~/.claude/projects/<project>/memory/` | Auto-memory (max 200 lines) |
-| **.claude/rules/*** | Project root | Modular project rules |
-| **context.md** | `~/.claude/projects/<project>/` | Session handoff |
+| Type | Location | Purpose | Shared |
+|------|----------|---------|--------|
+| **CLAUDE.md** | `./CLAUDE.md` or `./.claude/CLAUDE.md` | Project memory | ✅ Team |
+| **CLAUDE.local.md** | `./CLAUDE.local.md` | Personal settings | ❌ Private |
+| **MEMORY.md** | `~/.claude/projects/<project>/memory/MEMORY.md` | Auto-memory (max 200 lines) | ❌ Private |
+| **.claude/rules/*** | `./.claude/rules/*.md` | Modular rules | ✅ Team |
+| **context.md** | `~/.claude/projects/<project>/context.md` | Session handoff | ❌ Private |
+
+### Where `<project>` comes from
+
+The `<project>` identifier is derived from the **git repository root**:
+
+```bash
+# Convert full path to project identifier
+PROJECT_NAME="$(pwd | sed 's/^\///; s/[\/.]/-/g; s/^/-/')"
+
+# Example:
+# /Users/zayden.ok/Desktop/dev-others/zcc-marketplace
+# → -Users-zayden-ok-Desktop-dev-others-zcc-marketplace
+```
+
+All subdirectories within the same git repository share the same `<project>` directory.
 
 ## Context Location
 
 Context is stored in Claude Code's project directory:
 
 ```
-~/.claude/projects/<project-name>/context.md
+~/.claude/projects/<project>/context.md
 ```
+
+Example: `/Users/zayden.ok/Desktop/dev-others/zcc-marketplace`
+→ `~/.claude/projects/-Users-zayden-ok-Desktop-dev-others-zcc-marketplace/context.md`
 
 ## Context Format
 

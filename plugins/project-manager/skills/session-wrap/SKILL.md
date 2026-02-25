@@ -61,7 +61,27 @@ Session Summary:
 Task(
     subagent_type="doc-updater",
     description="Document update analysis",
-    prompt="[Session Summary]\n\nAnalyze documentation update needs for all Claude Code memory types: CLAUDE.md, CLAUDE.local.md, MEMORY.md, .claude/rules/*, and context.md. IMPORTANT: Check if .claude/rules/ directory exists - if NOT, recommend creating it. If it exists but is empty, recommend adding foundational rules."
+    prompt="""[Session Summary]
+
+Analyze documentation update needs for all Claude Code memory types.
+
+IMPORTANT: The doc-updater agent already knows the exact locations:
+- CLAUDE.md: <project-root>/CLAUDE.md or ./.claude/CLAUDE.md
+- .claude/rules/*: <project-root>/.claude/rules/*.md
+- CLAUDE.local.md: <project-root>/CLAUDE.local.md
+- MEMORY.md: ~/.claude/projects/<project>/memory/MEMORY.md
+- context.md: ~/.claude/projects/<project>/context.md
+
+Where <project> is derived from git repository root using:
+$(pwd | sed 's/^\///; s/[\/.]/-/g; s/^/-/')
+
+Example: /home/user/workspace/my-project → -home-user-workspace-my-project
+
+MANDATORY CHECK: Always verify if <project-root>/.claude/rules/ exists:
+- If NOT_EXISTS: Recommend creating it (even if no specific rules yet)
+- If EXISTS but empty: Recommend adding foundational rules
+- If EXISTS with rules: Check for missing modular opportunities
+"""
 )
 
 Task(

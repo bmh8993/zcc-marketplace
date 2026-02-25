@@ -127,3 +127,29 @@ fi
 
 [파싱된 세션 정보]
 ```
+
+## Appendix: Claude Code Memory Locations
+
+이 플러그인은 Claude Code의 표준 메모리 위치를 사용합니다:
+
+| Type | Location | Purpose | Shared |
+|------|----------|---------|--------|
+| **CLAUDE.md** | `./CLAUDE.md` 또는 `./.claude/CLAUDE.md` | 팀 공유 프로젝트 지침 | ✅ Team |
+| **CLAUDE.local.md** | `./CLAUDE.local.md` | 개인 프로젝트 설정 (git-ignored) | ❌ Private |
+| **MEMORY.md** | `~/.claude/projects/<project>/memory/MEMORY.md` | 자동 메모리 (최대 200줄 로드) | ❌ Private |
+| **.claude/rules/*** | `./.claude/rules/*.md` | 모듈형 프로젝트 규칙 | ✅ Team |
+| **context.md** | `~/.claude/projects/<project>/context.md` | 세션 handoff (플러그인 전용) | ❌ Private |
+
+**`<project>` 식별자 생성 방법:**
+```bash
+# git 저장소 루트에서 프로젝트 식별자 생성
+PROJECT_NAME="$(pwd | sed 's/^\///; s/[\/.]/-/g; s/^/-/')"
+
+# 예시:
+# /Users/zayden.ok/Desktop/dev-others/zcc-marketplace
+# → -Users-zayden-ok-Desktop-dev-others-zcc-marketplace
+```
+
+같은 git 저장소 내의 모든 하위 디렉토리는 동일한 `<project>` 디렉토리를 공유합니다.
+
+참고: https://code.claude.com/docs/en/memory

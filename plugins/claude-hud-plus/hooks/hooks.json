@@ -1,0 +1,8 @@
+{
+  "SessionStart": [
+    "hooks/SessionStart/save-session-id.sh"
+  ],
+  "SessionEnd": [
+    "hooks/SessionEnd/cleanup-session-id.sh"
+  ]
+}

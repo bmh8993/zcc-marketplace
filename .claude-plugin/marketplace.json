@@ -15,6 +15,12 @@
       "source": "./plugins/project-manager",
       "description": "Session-to-session context handoff and enhanced memory management",
       "version": "1.0.0"
+    },
+    {
+      "name": "claude-hud-plus",
+      "source": "./plugins/claude-hud-plus",
+      "description": "Enhanced HUD with session ID tracking - hooks automatically save and display session ID",
+      "version": "1.0.0"
     }
   ]
 }

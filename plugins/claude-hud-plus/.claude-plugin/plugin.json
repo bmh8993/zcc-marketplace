@@ -1,0 +1,8 @@
+{
+  "name": "claude-hud-plus",
+  "description": "Enhanced HUD with session ID tracking - hooks automatically save and display session ID",
+  "version": "1.0.0",
+  "author": {
+    "name": "zayden"
+  }
+}
